@@ -31,4 +31,5 @@ tofu apply
 
 1. Once completed, navigate back to the AWS Management Console and visit the ["My security credentials"](https://us-east-1.console.aws.amazon.com/iam/home#/security_credentials) section again.
 1. Select the access key id you created previously.
-1. In the "Actions" drop-down menu, click "Delete"
+1. In the "Actions" drop-down menu, click "Delete".
+1. In the popup modal, click "Deactivate" and then type in the access key ID to confirm. Click "Delete".
