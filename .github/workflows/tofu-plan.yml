@@ -51,11 +51,11 @@ jobs:
 
       - name: OpenTofu Validate
         id: Validate
-        run: tofu validate
+        run: tofu validate -no-color
 
       - name: OpenTofu Plan
         id: Plan
-        run: tofu plan
+        run: tofu plan -no-color
         continue-on-error: true
 
       - uses: actions/github-script@v6
