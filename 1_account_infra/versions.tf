@@ -4,6 +4,10 @@ terraform {
       version = "~> 5.41.0"
       source  = "opentofu/aws"
     }
+    cloudflare = {
+      source = "cloudflare/cloudflare"
+      version = "4.26.0"
+    }
   }
   backend "s3" {}
 }
