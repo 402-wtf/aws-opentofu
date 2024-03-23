@@ -6,10 +6,6 @@ on:
     branches:
       - main
 
-defaults:
-  run:
-    working-directory: ./1_account_infra
-
 permissions:
   pull-requests: write # Required to write to PRs
   id-token: write      # This is required for requesting the JWT
@@ -17,8 +13,16 @@ jobs:
   DeployPlan:
     runs-on: ubuntu-latest
     name: Deployment Plan
+    strategy:
+      matrix:
+        stack: ["1_account_infra"]
+    defaults:
+      run:
+        working-directory: ${{ vars.stack }}
     env:
       TF_VAR_ses_domains: ${{ vars.TF_VAR_SES_DOMAINS }}
+      TF_INPUT: 0
+      TF_IN_AUTOMATION: true
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS Credentials
@@ -39,7 +43,9 @@ jobs:
 
       - name: OpenTofu Init
         id: Init
-        run: tofu init
+        run: tofu init \
+          -backend-config="bucket=${{ vars.TOFU_STATE_BUCKET }}"\
+          -backend-config="key=aws-opentofu/${{ matrix.stack }}.tfstate"
 
       - name: OpenTofu Validate
         id: Validate
