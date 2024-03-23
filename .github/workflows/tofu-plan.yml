@@ -23,6 +23,7 @@ jobs:
       TF_VAR_ses_domains: ${{ vars.TF_VAR_SES_DOMAINS }}
       TF_INPUT: 0
       TF_IN_AUTOMATION: true
+      AWS_REGION: ${{ vars.AWS_REGION }}
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS Credentials
