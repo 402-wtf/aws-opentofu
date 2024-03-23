@@ -44,9 +44,10 @@ jobs:
 
       - name: OpenTofu Init
         id: Init
-        run: tofu init \
-          -backend-config="bucket=${{ vars.TOFU_STATE_BUCKET }}"\
-          -backend-config="key=aws-opentofu/${{ matrix.stack }}.tfstate"
+        run: |
+          tofu init \
+            -backend-config="bucket=${{ vars.TOFU_STATE_BUCKET }}"\
+            -backend-config="key=aws-opentofu/${{ matrix.stack }}.tfstate"
 
       - name: OpenTofu Validate
         id: Validate
