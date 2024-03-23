@@ -5,6 +5,7 @@ terraform {
       source  = "opentofu/aws"
     }
   }
+  backend "s3" { }
 }
 
 provider "aws" {
