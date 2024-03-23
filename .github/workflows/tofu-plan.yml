@@ -3,7 +3,8 @@ name: OpenTofu Plan - PR
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 defaults:
   run:
@@ -11,92 +12,94 @@ defaults:
 
 permissions:
   pull-requests: write
+jobs:
+  DeployPlan:
+    name: Deployment Plan
+    steps:
+      - uses: actions/checkout@v3
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}_pr
+          role-session-name: github_actions_pr
+          aws-region: ${{ vars.AWS_REGION }}
 
-steps:
-  - uses: actions/checkout@v3
-  - name: configure aws credentials
-    uses: aws-actions/configure-aws-credentials@v1.7.0
-    with:
-      role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}_pr
-      role-session-name: github_actions_pr
-      aws-region: ${{ vars.AWS_REGION }}
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.6.2
 
-  - uses: opentofu/setup-opentofu@v1
-    with:
-      tofu_version: 1.6.2
+      - name: OpenTofu Format
+        id: fmt
+        run: tofu fmt -check
+        continue-on-error: false
 
-  - name: OpenTofu Format
-    id: fmt
-    run: tofu fmt -check
-    continue-on-error: false
+      - name: OpenTofu Init
+        id: Init
+        run: tofu init
 
-  - name: OpenTofu Init
-    id: Init
-    run: tofu init
+      - name: OpenTofu Validate
+        id: Validate
+        run: tofu validate
 
-  - name: OpenTofu Validate
-    id: Validate
-    run: tofu validate
+      - name: OpenTofu Plan
+        id: Plan
+        run: tofu plan
+        continue-on-error: true
 
-  - name: OpenTofu Plan
-    id: Plan
-    run: tofu plan
-    continue-on-error: true
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "tofu\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // 1. Retrieve existing bot comments for the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('OpenTofu Format and Style')
+            })
 
-  - uses: actions/github-script@v6
-    if: github.event_name == 'pull_request'
-    env:
-      PLAN: "tofu\n${{ steps.plan.outputs.stdout }}"
-    with:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
-      script: |
-        // 1. Retrieve existing bot comments for the PR
-        const { data: comments } = await github.rest.issues.listComments({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: context.issue.number,
-        })
-        const botComment = comments.find(comment => {
-          return comment.user.type === 'Bot' && comment.body.includes('OpenTofu Format and Style')
-        })
+            // 2. Prepare format of the comment
+            const output = `#### OpenTofu Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### OpenTofu Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### OpenTofu Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
 
-        // 2. Prepare format of the comment
-        const output = `#### OpenTofu Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-        #### OpenTofu Initialization ⚙️\`${{ steps.init.outcome }}\`
-        #### OpenTofu Validation 🤖\`${{ steps.validate.outcome }}\`
-        <details><summary>Validation Output</summary>
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
 
-        \`\`\`\n
-        ${{ steps.validate.outputs.stdout }}
-        \`\`\`
+            </details>
 
-        </details>
+            #### OpenTofu Plan 📖\`${{ steps.plan.outcome }}\`
 
-        #### OpenTofu Plan 📖\`${{ steps.plan.outcome }}\`
+            <details><summary>Show Plan</summary>
 
-        <details><summary>Show Plan</summary>
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
 
-        \`\`\`\n
-        ${process.env.PLAN}
-        \`\`\`
+            </details>
 
-        </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
-        *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
-
-        // 3. If we have a comment, update it, otherwise create a new one
-        if (botComment) {
-          github.rest.issues.updateComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            comment_id: botComment.id,
-            body: output
-          })
-        } else {
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
-        }
+            // 3. If we have a comment, update it, otherwise create a new one
+            if (botComment) {
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+            }
