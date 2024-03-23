@@ -14,6 +14,7 @@ permissions:
   pull-requests: write
 jobs:
   DeployPlan:
+    runs-on: ubuntu-latest
     name: Deployment Plan
     steps:
       - uses: actions/checkout@v3
