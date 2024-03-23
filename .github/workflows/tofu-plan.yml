@@ -17,6 +17,8 @@ jobs:
   DeployPlan:
     runs-on: ubuntu-latest
     name: Deployment Plan
+    env:
+      TF_VAR_ses_domains: ${{ vars.TF_VAR_SES_DOMAINS }}
     steps:
       - uses: actions/checkout@v3
       - name: Configure AWS Credentials
