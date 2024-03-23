@@ -3,7 +3,8 @@ name: OpenTofu Plan - PR
 
 on:
   pull_request:
-    - main
+    branches:
+      - main
 
 defaults:
   run:
