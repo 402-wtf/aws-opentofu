@@ -1,5 +1,5 @@
 ---
-name: OpenTofu Plan - PR
+name: OpenTofu Apply
 
 on:
   push:
