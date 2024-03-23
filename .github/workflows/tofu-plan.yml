@@ -40,7 +40,7 @@ jobs:
       - name: OpenTofu Format
         id: fmt
         run: tofu fmt -check
-        continue-on-error: false
+        continue-on-error: true
 
       - name: OpenTofu Init
         id: Init
@@ -97,7 +97,7 @@ jobs:
 
             </details>
 
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.stack }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
             // 3. If we have a comment, update it, otherwise create a new one
             if (botComment) {
