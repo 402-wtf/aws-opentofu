@@ -33,9 +33,9 @@ data "aws_iam_policy_document" "github_assume_role_policy" {
 }
 
 resource "aws_iam_role" "github_cicd_role" {
-  name               = "github_actions"
-  path               = "/service-account/"
-  assume_role_policy = data.aws_iam_policy_document.github_assume_role_policy.json
+  name                = "github_actions"
+  path                = "/service-account/"
+  assume_role_policy  = data.aws_iam_policy_document.github_assume_role_policy.json
   managed_policy_arns = ["arn:aws:iam::aws:policy/AdministratorAccess"]
 }
 
@@ -67,9 +67,9 @@ data "aws_iam_policy_document" "github_pr_assume_role_policy" {
 }
 
 resource "aws_iam_role" "github_pr_cicd_role" {
-  name               = "github_actions_pr"
-  path               = "/service-account/"
-  assume_role_policy = data.aws_iam_policy_document.github_pr_assume_role_policy.json
+  name                = "github_actions_pr"
+  path                = "/service-account/"
+  assume_role_policy  = data.aws_iam_policy_document.github_pr_assume_role_policy.json
   managed_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
 }
 
