@@ -5,6 +5,7 @@ terraform {
       source  = "opentofu/aws"
     }
   }
+  backend "s3" {}
 }
 
 provider "aws" {
@@ -12,7 +13,7 @@ provider "aws" {
   default_tags {
     tags = {
       "Managed-By" = "OpenTofu"
-      "Repo" = "aws-opentofu"
+      "Repo"       = "aws-opentofu"
     }
   }
 }

@@ -3,10 +3,7 @@
 name: Connect to an AWS role from a GitHub repository
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 # Permission can be added at job level or workflow level
 permissions:
@@ -18,12 +15,21 @@ jobs:
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
         with:
           role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
           role-session-name: github_actions
           aws-region: ${{ vars.AWS_REGION }}
+        if: github.event_name != 'pull_request'
+      - name: Configure AWS Credentials - PR
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}_pr
+          role-session-name: github_actions_pr
+          aws-region: ${{ vars.AWS_REGION }}
+        if: github.event_name == 'pull_request'
+
       # Hello from AWS: WhoAmI
       - name: Sts GetCallerIdentity
         run: |

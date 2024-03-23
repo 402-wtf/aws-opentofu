@@ -5,7 +5,7 @@ variable "prefix" {
 }
 
 variable "ses_domains" {
-  type        = list(string)
+  type        = set(string)
   default     = []
   description = "A list of domain names to use as SES identities"
 }

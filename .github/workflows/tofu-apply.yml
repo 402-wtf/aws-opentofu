@@ -1,0 +1,49 @@
+---
+name: OpenTofu Plan - PR
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write # Required to write to PRs
+  id-token: write      # This is required for requesting the JWT
+jobs:
+  DeployApply:
+    runs-on: ubuntu-latest
+    name: Deployment Apply
+    strategy:
+      matrix:
+        stack: ["1_account_infra"]
+    defaults:
+      run:
+        working-directory: ${{ matrix.stack }}
+    env:
+      TF_VAR_ses_domains: ${{ vars.TF_VAR_SES_DOMAINS }}
+      TF_INPUT: 0
+      TF_IN_AUTOMATION: true
+      AWS_REGION: ${{ vars.AWS_REGION }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
+          role-session-name: github_actions
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.6.2
+
+      - name: OpenTofu Init
+        id: Init
+        run: |
+          tofu init \
+            -backend-config="bucket=${{ vars.TOFU_STATE_BUCKET }}"\
+            -backend-config="key=aws-opentofu/${{ matrix.stack }}.tfstate"
+
+      - name: OpenTofu Apply
+        id: Plan
+        run: tofu apply --auto-approve
