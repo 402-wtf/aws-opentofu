@@ -18,7 +18,7 @@ jobs:
         stack: ["1_account_infra"]
     defaults:
       run:
-        working-directory: ${{ vars.stack }}
+        working-directory: ${{ matrix.stack }}
     env:
       TF_VAR_ses_domains: ${{ vars.TF_VAR_SES_DOMAINS }}
       TF_INPUT: 0
