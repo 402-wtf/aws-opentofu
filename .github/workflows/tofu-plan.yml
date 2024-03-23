@@ -11,14 +11,15 @@ defaults:
     working-directory: ./1_account_infra
 
 permissions:
-  pull-requests: write
+  pull-requests: write # Required to write to PRs
+  id-token: write      # This is required for requesting the JWT
 jobs:
   DeployPlan:
     runs-on: ubuntu-latest
     name: Deployment Plan
     steps:
       - uses: actions/checkout@v3
-      - name: configure aws credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
           role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}_pr

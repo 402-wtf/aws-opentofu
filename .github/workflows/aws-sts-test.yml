@@ -18,14 +18,14 @@ jobs:
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v3
-      - name: configure aws credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
           role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
           role-session-name: github_actions
           aws-region: ${{ vars.AWS_REGION }}
         if: github.event_name != 'pull_request'
-      - name: configure aws credentials - PR
+      - name: Configure AWS Credentials - PR
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
           role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}_pr
