@@ -42,3 +42,34 @@ resource "aws_iam_role" "github_cicd_role" {
 output "github_oidc_role_arn" {
   value = aws_iam_role.github_cicd_role.arn
 }
+
+data "aws_iam_policy_document" "github_pr_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:402-wtf/*:pull_request"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github_oidc.arn]
+    }
+  }
+}
+
+resource "aws_iam_role" "github_pr_cicd_role" {
+  name               = "github_actions_pr"
+  path               = "/service-account/"
+  assume_role_policy = data.aws_iam_policy_document.github_pr_assume_role_policy.json
+  managed_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+}
+

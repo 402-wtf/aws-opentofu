@@ -24,6 +24,15 @@ jobs:
           role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
           role-session-name: github_actions
           aws-region: ${{ vars.AWS_REGION }}
+        if: github.event_name != 'pull_request'
+      - name: configure aws credentials - PR
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}_pr
+          role-session-name: github_actions_pr
+          aws-region: ${{ vars.AWS_REGION }}
+        if: github.event_name == 'pull_request'
+
       # Hello from AWS: WhoAmI
       - name: Sts GetCallerIdentity
         run: |
