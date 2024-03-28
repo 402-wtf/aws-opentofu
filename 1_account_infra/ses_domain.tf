@@ -30,5 +30,5 @@ resource "cloudflare_record" "dkim_records" {
   value   = "${local.dkim_tokens[count.index].token}.dkim.amazonses.com"
   type    = "CNAME"
   ttl     = 300
-  comment = "AWS SES - ${local.dkim_tokens[count.index].domain}"
+  comment = "AWS SES - ${local.dkim_tokens[count.index].domain} - Managed by OpenTofu"
 }
