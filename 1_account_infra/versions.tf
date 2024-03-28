@@ -5,7 +5,7 @@ terraform {
       source  = "opentofu/aws"
     }
     cloudflare = {
-      source = "cloudflare/cloudflare"
+      source  = "cloudflare/cloudflare"
       version = "4.26.0"
     }
   }
