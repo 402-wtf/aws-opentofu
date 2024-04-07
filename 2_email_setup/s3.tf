@@ -22,10 +22,13 @@ data "aws_iam_policy_document" "allow_ses_to_rw_to_s3" {
       variable = "AWS:SourceAccount"
       values = [data.aws_caller_identity.current.account_id]
     }
-    condition {
-      test = "StringEquals"
-      variable = "AWS:SourceArn"
-      values = [aws_ses_receipt_rule.email_ingress[each.key].arn]
+    dynamic "condition" {
+      for_each = var.ses_domains
+      content {
+        test = "StringEquals"
+        variable = "AWS:SourceArn"
+        values = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:receipt-rule-set/default_ruleset:receipt-rule/${each.key}-ingress"]
+      }
     }
   }
 }

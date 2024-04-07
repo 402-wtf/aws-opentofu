@@ -36,14 +36,18 @@ resource "cloudflare_record" "dkim_records" {
 }
 
 resource "aws_ses_receipt_rule_set" "receiving_rulesets" {
-  for_each = var.ses_domains
-  rule_set_name = "${each.key}_ruleset"
+  rule_set_name = "default_ruleset"
+}
+
+resource "aws_ses_active_receipt_rule_set" "enable_ruleset" {
+  rule_set_name = aws_ses_receipt_rule_set.receiving_rulesets.id
 }
 
 resource "aws_ses_receipt_rule" "email_ingress" {
+  depends_on    = [aws_s3_bucket_policy.allow_ses_to_rw_to_s3]
   for_each      = var.ses_domains
-  name          = "default-ingress"
-  rule_set_name = "${each.key}_ruleset"
+  name          = "${each.key}-ingress"
+  rule_set_name = aws_ses_receipt_rule_set.receiving_rulesets.id
   recipients    = [each.key]
   enabled       = true
   scan_enabled  = false
