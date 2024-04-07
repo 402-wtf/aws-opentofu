@@ -15,7 +15,7 @@ jobs:
     name: Deployment Apply
     strategy:
       matrix:
-        stack: ["1_account_infra"]
+        stack: ["1_account_infra", "2_email_setup"]
     defaults:
       run:
         working-directory: ${{ matrix.stack }}
