@@ -57,4 +57,32 @@ resource "aws_ses_receipt_rule" "email_ingress" {
     object_key_prefix = "ingress/"
     position = 1
   }
+
+  stop_action {
+    scope = "RuleSet"
+    position = 2
+  }
+}
+
+resource "aws_ses_receipt_rule" "bounce_fallback" {
+  depends_on = [aws_ses_receipt_rule.email_ingress]
+  for_each = var.ses_domains
+  name = "${each.key}-bounce-fallback"
+  rule_set_name = aws_ses_receipt_rule_set.receiving_rulesets.id
+  recipients = [each.key]
+  enabled       = true
+  after = aws_ses_receipt_rule.email_ingress[each.key].id
+
+  bounce_action {
+    message = "Mailbox does not exist"
+    sender = "postmaster@${each.key}"
+    smtp_reply_code = "550"
+    status_code = "5.1.1"
+    position = 1
+  }
+
+  stop_action {
+    scope = "RuleSet"
+    position = 2
+  }
 }
