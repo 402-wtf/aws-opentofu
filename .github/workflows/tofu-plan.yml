@@ -43,6 +43,11 @@ jobs:
         run: tofu fmt -check
         continue-on-error: true
 
+      - name: Setup SSH Agent
+        run: |
+          ssh-agent -s
+          ssh-add - <<< '${{ secrets.AWS_OPENTOFU_DEPLOY_PRIV_KEY }}'
+
       - name: OpenTofu Init
         id: Init
         run: |

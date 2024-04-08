@@ -38,6 +38,11 @@ jobs:
         with:
           tofu_version: 1.6.2
 
+      - name: Setup SSH Agent
+        run: |
+          ssh-agent -s
+          ssh-add - <<< '${{ secrets.AWS_OPENTOFU_DEPLOY_PRIV_KEY }}'
+
       - name: OpenTofu Init
         id: Init
         run: |
