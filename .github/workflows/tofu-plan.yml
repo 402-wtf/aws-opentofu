@@ -44,9 +44,9 @@ jobs:
         continue-on-error: true
 
       - name: Setup SSH Agent
-        run: |
-          ssh-agent -s
-          ssh-add - <<< '${{ secrets.AWS_OPENTOFU_DEPLOY_PRIV_KEY }}'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.AWS_OPENTOFU_DEPLOY_PRIV_KEY }}
 
       - name: OpenTofu Init
         id: Init
